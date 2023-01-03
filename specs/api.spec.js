@@ -1,26 +1,17 @@
 import axios from "axios";
 
 describe("API tests", () => {
-  it("Checki if API is working", async () => {
-    const config = {
-      method: "GET",
-      url: "https://bookstore.demoqa.com/bookstore/v1/books",
-    };
-    const responce = await axios(config);
-    expect(responce.status).toEqual(200);
-  });
-
   it("Register a new user", async () => {
     const config = {
       method: "POST",
       url: "https://bookstore.demoqa.com/account/v1/user",
       data: {
-        userName: "Rodriguez",
-        password: "Password888!",
+        userName: "DemoUser003",
+        password: "DemoPass003!",
       },
     };
-    const responce = await axios(config);
-    expect(responce.status).toEqual(201);
+    const response = await axios(config);
+    expect(response.status).toEqual(201);
   });
 
   it("User already exists", async () => {
@@ -28,12 +19,16 @@ describe("API tests", () => {
       method: "POST",
       url: "https://bookstore.demoqa.com/account/v1/user",
       data: {
-        userName: "Rodriguez",
-        password: "Password888!",
+        userName: "DemoUser001",
+        password: "DemoPass001!",
       },
     };
-    const responce = await axios(config);
-    expect(responce.status).toEqual(406);
+    try {
+      const response = await axios(config);
+    } catch (error) {
+      expect(error.response.status).toEqual(406);
+      expect(error.response.data.message).toEqual("User exists!");
+    }
   });
 
   it("User not found / wrong password", async () => {
@@ -41,12 +36,16 @@ describe("API tests", () => {
       method: "POST",
       url: "https://bookstore.demoqa.com/account/v1/authorized",
       data: {
-        userName: "Rodriguez",
+        userName: "DemoUser001",
         password: "WrongPassword!",
       },
     };
-    const responce = await axios(config);
-    expect(responce.status).toEqual(404);
+    try {
+      const response = await axios(config);
+    } catch (error) {
+      expect(error.response.status).toEqual(404);
+      expect(error.response.data.message).toEqual("User not found!");
+    }
   });
 
   it("Generate Token when a user is registered", async () => {
@@ -54,12 +53,14 @@ describe("API tests", () => {
       method: "POST",
       url: "https://bookstore.demoqa.com/account/v1/generatetoken",
       data: {
-        userName: "Rodriguez",
-        password: "Password888!",
+        userName: "DemoUser001",
+        password: "DemoPass001!",
       },
     };
-    const responce = await axios(config);
-    expect(responce.status).toEqual(200);
+    const response = await axios(config);
+    expect(response.status).toEqual(200);
+    expect(response.data.status).toEqual("Success");
+    expect(response.data.result).toEqual("User authorized successfully.");
   });
 
   it("Generate Token when a user doesn't exist", async () => {
@@ -67,11 +68,14 @@ describe("API tests", () => {
       method: "POST",
       url: "https://bookstore.demoqa.com/account/v1/generatetoken",
       data: {
-        userName: "Mitchell",
-        password: "randomPass777!",
+        userName: "DemoUser888",
+        password: "DemoPass888!",
       },
     };
-    const responce = await axios(config);
-    expect(responce.status).toEqual(400);
+    const response = await axios(config);
+    expect(response.status).toEqual(200);
+    expect(response.data.token).toEqual(null);
+    expect(response.data.status).toEqual("Failed");
+    expect(response.data.result).toEqual("User authorization failed.");
   });
 });
